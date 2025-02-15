@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { ServerSimulator } from '../utils/ServerSimulator';
 import { SimulationDataPoint, ServerConfig, TimeConfig, RateControlAlgorithm } from '../types';
 
-const MAX_TIME_WINDOW = 30; // 30 seconds of history
 const UPDATE_INTERVAL = 1000 / 60; // 60 FPS
 
 interface SimulationTime {
@@ -44,7 +43,7 @@ export function useSimulation(
 
   const addDataPoint = useCallback((wasSuccessful: boolean, targetRPM: number) => {
     const simTime = simulationTime.current.simulationTime / 1000; // Convert to seconds
-    const actualRPM = serverSimulator.current.getCurrentRPM();
+    const actualRPM = Math.max(0, serverSimulator.current.getCurrentRPM());
     
     // Update accumulated stats
     setAccumulatedStats(prev => ({
@@ -63,14 +62,14 @@ export function useSimulation(
         badResponses: wasSuccessful ? 0 : 1
       };
 
-      // Filter out points older than MAX_TIME_WINDOW seconds
+      // Filter out points older than the configured time window (in seconds)
       const newData = [...prevData, newPoint].filter(
-        point => simTime - point.relativeTime <= MAX_TIME_WINDOW
+        point => simTime - point.relativeTime <= timeConfig.timeWindow
       );
 
       return newData;
     });
-  }, []);
+  }, [timeConfig.timeWindow]);
 
   const processRequests = useCallback(() => {
     // Process requests as long as simulation time has reached the next scheduled request time
@@ -120,6 +119,9 @@ export function useSimulation(
 
   useEffect(() => {
     serverSimulator.current.updateConfig(serverConfig);
+    // Reset the server simulator's request history and algorithm state to avoid negative RPM calculations
+    serverSimulator.current.reset();
+    algorithm.reset();
     // Reset accumulated stats when server config changes
     setAccumulatedStats({
       totalRequests: 0,
@@ -127,14 +129,16 @@ export function useSimulation(
       totalRPM: 0,
       rpmSamples: 0
     });
-    // Don't reset data, just reset timing
+    // Clear previous data points
+    setData([]);
+    // Reset timing
     simulationTime.current = {
       simulationTime: 0,
       nextRequestTime: 0,
       leftoverTime: 0
     };
     lastUpdateTime.current = Date.now();
-  }, [serverConfig]);
+  }, [serverConfig, algorithm]);
 
   const resetSimulation = useCallback(() => {
     setData([]);
@@ -153,6 +157,11 @@ export function useSimulation(
     };
     lastUpdateTime.current = Date.now();
   }, [algorithm]);
+
+  useEffect(() => {
+    const currentSimTime = simulationTime.current.simulationTime / 1000;
+    setData(prevData => prevData.filter(point => currentSimTime - point.relativeTime <= timeConfig.timeWindow));
+  }, [timeConfig.timeWindow]);
 
   return {
     data,

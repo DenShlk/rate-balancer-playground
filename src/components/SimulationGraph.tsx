@@ -15,6 +15,7 @@ import { SimulationDataPoint } from '../types';
 interface Props {
   data: SimulationDataPoint[];
   maxRPM: number;
+  timeWindow: number;
   width?: number;
   height?: number;
   accumulatedStats: {
@@ -82,6 +83,7 @@ const MAX_HISTORY_POINTS = 15; // Maximum number of history points to show
 const SimulationGraph: React.FC<Props> = ({
   data,
   maxRPM,
+  timeWindow,
   width = 800,
   height = 400,
   accumulatedStats
@@ -110,7 +112,7 @@ const SimulationGraph: React.FC<Props> = ({
       
       // Process history data (requests)
       const historyBucketKey = Math.floor(timeAgo / HISTORY_BUCKET_SIZE) * HISTORY_BUCKET_SIZE;
-      if (historyBucketKey > -MAX_HISTORY_POINTS * HISTORY_BUCKET_SIZE) { // Only process recent history
+      if (historyBucketKey > -timeWindow) { // Use timeWindow instead of MAX_HISTORY_POINTS*HISTORY_BUCKET_SIZE
         const bucket = historyBuckets.get(historyBucketKey) || { good: 0, bad: 0 };
         bucket.good += point.goodResponses;
         bucket.bad += point.badResponses;
@@ -128,11 +130,10 @@ const SimulationGraph: React.FC<Props> = ({
         goodResponses: counts.good,
         badResponses: counts.bad
       }))
-      .sort((a, b) => a.timeAgo - b.timeAgo)
-      .slice(-MAX_HISTORY_POINTS); // Limit number of bars
+      .sort((a, b) => a.timeAgo - b.timeAgo);
 
     return { mainData, historyData };
-  }, [data]);
+  }, [data, timeWindow]);
 
   const formatTime = (timeAgo: number) => {
     return `${timeAgo.toFixed(1)}s`;
@@ -157,18 +158,18 @@ const SimulationGraph: React.FC<Props> = ({
   return (
     <GraphContainer>
       <StatsOverlay>
-        <StatItem>
+        <div>
           <StatValue color="#82ca9d">{overallSuccessRate}%</StatValue>
           <StatLabel>Success Rate</StatLabel>
-        </StatItem>
-        <StatItem>
+        </div>
+        <div>
           <StatValue color="#8884d8">{averageRPM}</StatValue>
           <StatLabel>Average RPM</StatLabel>
-        </StatItem>
-        <StatItem>
+        </div>
+        <div>
           <StatValue color="#ff7300">{expectedGoodRPM}</StatValue>
           <StatLabel>Expected Good RPM</StatLabel>
-        </StatItem>
+        </div>
       </StatsOverlay>
 
       {/* Main Graph - RPM */}
@@ -178,7 +179,7 @@ const SimulationGraph: React.FC<Props> = ({
           <XAxis
             dataKey="timeAgo"
             tickFormatter={formatTime}
-            domain={['dataMin', 'dataMax']}
+            domain={[-timeWindow, 0]}
             type="number"
             hide={true}
           />
@@ -223,7 +224,7 @@ const SimulationGraph: React.FC<Props> = ({
           <XAxis
             dataKey="timeAgo"
             tickFormatter={formatTime}
-            domain={['dataMin', 'dataMax']}
+            domain={[-timeWindow, 0]}
             type="number"
             label={{ value: 'Time (seconds ago)', position: 'insideBottom', offset: -5 }}
             height={40}

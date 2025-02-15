@@ -17,6 +17,7 @@ export interface ServerConfig {
 export interface TimeConfig {
   timeScale: number;
   isPlaying: boolean;
+  timeWindow: number;
 }
 
 export interface SimulationDataPoint {

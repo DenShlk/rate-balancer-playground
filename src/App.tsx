@@ -56,7 +56,8 @@ function App() {
 
   const initialTimeConfig: TimeConfig = {
     timeScale: 1,
-    isPlaying: false
+    isPlaying: false,
+    timeWindow: 30
   };
 
   const {
@@ -115,6 +116,7 @@ function App() {
           data={data}
           maxRPM={currentServerConfig.maxRPM}
           accumulatedStats={accumulatedStats}
+          timeWindow={currentTimeConfig.timeWindow}
         />
       </MainContent>
     </AppContainer>

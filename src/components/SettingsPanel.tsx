@@ -245,6 +245,22 @@ const SettingsPanel: React.FC<Props> = ({
             <Value>{timeConfig.timeScale}x</Value>
           </SliderContainer>
         </InputGroup>
+        <InputGroup>
+          <Label>Time Window</Label>
+          <Select
+            value={timeConfig.timeWindow}
+            onChange={(e) => onTimeConfigChange({
+              ...timeConfig,
+              timeWindow: Number(e.target.value)
+            })}
+          >
+            <option value={30}>30s</option>
+            <option value={120}>2m</option>
+            <option value={300}>5m</option>
+            <option value={900}>15m</option>
+            <option value={3600}>1h</option>
+          </Select>
+        </InputGroup>
         <ButtonGroup>
           <Button
             onClick={() => onTimeConfigChange({
