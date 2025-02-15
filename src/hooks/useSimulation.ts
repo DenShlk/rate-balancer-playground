@@ -121,23 +121,14 @@ export function useSimulation(
     serverSimulator.current.updateConfig(serverConfig);
     // Reset the server simulator's request history and algorithm state to avoid negative RPM calculations
     serverSimulator.current.reset();
-    algorithm.reset();
-    // Reset accumulated stats when server config changes
     setAccumulatedStats({
       totalRequests: 0,
       goodRequests: 0,
       totalRPM: 0,
       rpmSamples: 0
     });
-    // Clear previous data points
-    setData([]);
-    // Reset timing
-    simulationTime.current = {
-      simulationTime: 0,
-      nextRequestTime: 0,
-      leftoverTime: 0
-    };
     lastUpdateTime.current = Date.now();
+    // Do not reset the whole simulation here.
   }, [serverConfig, algorithm]);
 
   const resetSimulation = useCallback(() => {

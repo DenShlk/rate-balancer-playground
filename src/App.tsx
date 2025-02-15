@@ -6,6 +6,8 @@ import { FixedRateAlgorithm } from './algorithms/FixedRateAlgorithm';
 import { ConstantAdjustmentsAlgorithm } from './algorithms/ConstantAdjustmentsAlgorithm';
 import { MultiplicativeAdjustmentsAlgorithm } from './algorithms/MultiplicativeAdjustmentsAlgorithm';
 import { AIMDAlgorithm } from './algorithms/AIMDAlgorithm';
+import { StatsLerpAlgorithm } from './algorithms/StatsLerpAlgorithm';
+// import { SafeBoundAlgorithm } from './algorithms/SafeBoundAlgorithm';
 import { useSimulation } from './hooks/useSimulation';
 import { ServerConfig, TimeConfig, RateControlAlgorithm } from './types';
 
@@ -36,6 +38,8 @@ const ALGORITHMS = {
   'Constant Adjustments': ConstantAdjustmentsAlgorithm,
   'Multiplicative Adjustments': MultiplicativeAdjustmentsAlgorithm,
   'Additive increase/multiplicative decrease': AIMDAlgorithm,
+  'Stats Lerp Algorithm': StatsLerpAlgorithm,
+  // 'Safe Bound Algorithm': SafeBoundAlgorithm
 } as const;
 
 function App() {
@@ -50,8 +54,8 @@ function App() {
   
   const initialServerConfig: ServerConfig = {
     maxRPM: 100,
-    badResponsePercentage: 10,
-    requestsToTrack: 10  // Track last 10 requests for RPM calculation
+    badResponsePercentage: 2,
+    requestsToTrack: 5  // Track last 5 requests for RPM calculation
   };
 
   const initialTimeConfig: TimeConfig = {

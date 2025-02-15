@@ -9,8 +9,8 @@ export class AIMDAlgorithm implements RateControlAlgorithm {
 
   constructor(
     initialRate: number = 60,
-    addIncrease: number = 5,
-    multiDecreaseFactor: number = 0.5,
+    addIncrease: number = 3,
+    multiDecreaseFactor: number = 0.9,
     minRate: number = 1,
     maxRate: number = 300
   ) {
